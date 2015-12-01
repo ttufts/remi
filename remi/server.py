@@ -161,7 +161,7 @@ class WebSocketsHandler(socketserver.StreamRequestHandler):
                     self.handshake_done = False
                     log.debug('ws ending websocket service')
                     break
-            
+
     def bytetonum(self,b):
         if pyLessThan3:
             b = ord(b)
@@ -420,7 +420,7 @@ class App(BaseHTTPRequestHandler, object):
         clients[k].script_header = """
 <script>
 // from http://stackoverflow.com/questions/5515869/string-length-in-bytes-in-javascript
-// using UTF8 strings I noticed that the javascript .length of a string returned less 
+// using UTF8 strings I noticed that the javascript .length of a string returned less
 // characters than they actually were
 var pendingSendMessages=[];
 function byteLength(str) {
@@ -522,7 +522,7 @@ function renewConnection(){
 }
 function checkTimeout(){
     if(pendingSendMessages.length>0)
-        renewConnection();    
+        renewConnection();
 }
 function websocketOnClose(evt){
     /* websocket is closed. */
@@ -584,7 +584,7 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
             savepath = self.headers['savepath']
             filename = self.headers['filename']
             form = cgi.FieldStorage(
-                fp=self.rfile, 
+                fp=self.rfile,
                 headers=self.headers,
                 environ={'REQUEST_METHOD':'POST',
                         'CONTENT_TYPE':self.headers['Content-Type'],
@@ -673,7 +673,7 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
             param_dict = parse_qs(urlparse(function).query)
             for k in param_dict:
                 params.append(param_dict[k])
-            
+
             widget,function = attr_call.group(1,2)
             try:
                 content,headers = get_method_by(get_method_by(self.client.root, widget), function)(*params)
@@ -726,13 +726,13 @@ class Server(object):
 
     def start(self, *userdata):
         # here the websocket is started on an ephemereal port
-        self._wsserver = ThreadedWebsocketServer((self._address, 0), WebSocketsHandler, self._multiple_instance)
+        self._wsserver = ThreadedWebsocketServer((self._address, 5000), WebSocketsHandler, self._multiple_instance)
         wshost, wsport = self._wsserver.socket.getsockname()[:2]
         log.info('Started websocket server %s:%s' % (wshost, wsport))
         self._wsth = threading.Thread(target=self._wsserver.serve_forever)
         self._wsth.daemon = True
         self._wsth.start()
-        
+
         # Create a web server and define the handler to manage the incoming
         # request
         self._sserver = ThreadedHTTPServer((self._address, self._sport), self._gui,
@@ -785,4 +785,3 @@ def start(mainGuiClass, **kwargs):
     logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
     s = Server(mainGuiClass, start=True, **kwargs)
     s.serve_forever()
-
