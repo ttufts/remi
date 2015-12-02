@@ -782,6 +782,17 @@ def start(mainGuiClass, **kwargs):
         debug = kwargs.pop('debug')
     except KeyError:
         debug = False
-    logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
+    # logging.basicConfig(level=logging.DEBUG if debug else logging.INFO)
+
+    ch = logging.StreamHandler()
+    ch.setFormatter(logging.Formatter())
+
+    if debug:
+        ch.setLevel(logging.DEBUG)
+    else:
+        ch.setLevel(logging.INFO)
+
+    log.addHandler(ch)
+
     s = Server(mainGuiClass, start=True, **kwargs)
     s.serve_forever()
