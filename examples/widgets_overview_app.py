@@ -26,7 +26,7 @@ class MyApp(App):
         """ Usefull function to schedule tasks. 
         Called every configuration.UPDATE_ITERVAL """
         super(MyApp, self).idle()
-        
+
     def main(self):
         verticalContainer = gui.Widget(640, 900, gui.Widget.LAYOUT_VERTICAL, 10)
 
@@ -49,7 +49,7 @@ class MyApp(App):
 
         self.count=0
         self.counter=gui.Label(200, 30, '')
-        
+
         self.lbl = gui.Label(200, 30, 'This is a LABEL!')
 
         self.bt = gui.Button(200, 30, 'Press me!')
@@ -106,11 +106,11 @@ class MyApp(App):
         self.date = gui.Date(200, 20, '2015-04-13')
         self.date.set_on_change_listener(self, 'date_changed')
 
-        self.video = gui.VideoPlayer(480, 270, 'http://www.w3schools.com/tags/movie.mp4', 
+        self.video = gui.VideoPlayer(480, 270, 'http://www.w3schools.com/tags/movie.mp4',
                     'http://www.oneparallel.com/wp-content/uploads/2011/01/placeholder.jpg')
 
         # appending a widget to another, the first argument is a string key
-        subContainerRight.append('0', self.counter)        
+        subContainerRight.append('0', self.counter)
         subContainerRight.append('1', self.lbl)
         subContainerRight.append('2', self.bt)
         subContainerRight.append('3', self.txt)
@@ -165,15 +165,15 @@ class MyApp(App):
 
         # kick of regular display of counter
         self.display_counter()
-        
+
         # returning the root widget
         return verticalContainer
 
     def display_counter(self):
         self.counter.set_text('Running Time: ' + str(self.count))
         self.count+=1
-        Timer(1,self.display_counter).start()         
-        
+        Timer(1,self.display_counter).start()
+
     def menu_dialog_clicked(self):
         self.dialog=gui.GenericDialog(title='Dialog Box', message='Click Ok to transfer content to main page')
 
@@ -182,7 +182,7 @@ class MyApp(App):
         self.dialog.add_field_with_label('dtextinput','Text Input',self.dtextinput)
 
         self.dcheck = gui.CheckBox(200, 30, False)
-        self.dialog.add_field_with_label('dcheck','Label Checkbox',self.dcheck)        
+        self.dialog.add_field_with_label('dcheck','Label Checkbox',self.dcheck)
         values=( 'Danny Young','Christine Holand','Lars Gordon','Roberto Robitaille')
         self.dlistView = gui.ListView(200, 120)
         key=0
@@ -225,7 +225,7 @@ class MyApp(App):
 
         result=self.dialog.get_field('dcheck').get_value()
         self.check.set_value(result)
-        
+
         result=self.dialog.get_field('ddropdown').get_value()
         self.dropDown.set_value(result)
 
@@ -272,9 +272,9 @@ class MyApp(App):
 
     def on_input_dialog_confirm(self, value):
         self.lbl.set_text('Hello ' + value)
-        
+
     def open_fileselection_dialog(self):
-        self.fileselectionDialog = gui.FileSelectionDialog( 600, 310, 
+        self.fileselectionDialog = gui.FileSelectionDialog( 600, 310,
             'File Selection Dialog', 'Select files and folders',False,'.')
         self.fileselectionDialog.set_on_confirm_value_listener(
             self, 'on_fileselection_dialog_confirm')
@@ -317,7 +317,7 @@ class MyApp(App):
 
     def menu_view_clicked(self):
         self.lbl.set_text('Menu clicked: View')
-        
+
     def fileupload_on_success(self, filename):
         self.lbl.set_text('File upload success: ' + filename)
 
