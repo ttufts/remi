@@ -60,13 +60,14 @@ log = logging.getLogger('remi.server')
 
 
 def toWebsocket(data):
-    #encoding end deconding utility function
+    # encoding end deconding utility function
     if pyLessThan3:
         return quote(data)
     return quote(data, encoding='utf-8')
 
+
 def fromWebsocket(data):
-    #encoding end deconding utility function
+    # encoding end deconding utility function
     if pyLessThan3:
         return unquote(data)
     return unquote(data, encoding='utf-8')
@@ -124,7 +125,7 @@ def get_instance_key(handler):
         # instance
         return 0
     ip = handler.client_address[0]
-    unique_port = getattr(handler.server,'websocket_address', handler.server.server_address)[1]
+    unique_port = getattr(handler.server, 'websocket_address', handler.server.server_address)[1]
     return ip, unique_port
 
 
@@ -148,8 +149,8 @@ class WebSocketsHandler(socketserver.StreamRequestHandler):
 
     def handle(self):
         log.debug('ws handle')
-        #on some systems like ROS, the default socket timeout
-        #is less than expected, we force it to infinite (None) as default socket value
+        # on some systems like ROS, the default socket timeout
+        # is less than expected, we force it to infinite (None) as default socket value
         self.request.settimeout(None)
         while True:
             if not self.handshake_done:
@@ -162,7 +163,7 @@ class WebSocketsHandler(socketserver.StreamRequestHandler):
                     log.debug('ws ending websocket service')
                     break
 
-    def bytetonum(self,b):
+    def bytetonum(self, b):
         if pyLessThan3:
             b = ord(b)
         return b
@@ -200,17 +201,17 @@ class WebSocketsHandler(socketserver.StreamRequestHandler):
             out.append(127)
             out = out + struct.pack('>Q', length)
         if not pyLessThan3:
-            message = message.encode('utf-8')#'ascii',errors='replace')
+            message = message.encode('utf-8')  # 'ascii',errors='replace')
         out = out + message
         self.request.send(out)
 
     def handshake(self):
         log.debug('handshake')
         data = self.request.recv(1024).strip()
-        #headers = Message(StringIO(data.split(b'\r\n', 1)[1]))
+        # headers = Message(StringIO(data.split(b'\r\n', 1)[1]))
         log.debug('Handshaking...')
-        key = data.decode().split('Sec-WebSocket-Key: ')[1].split('\r\n')[0] #headers['Sec-WebSocket-Key']
-        #key = key
+        key = data.decode().split('Sec-WebSocket-Key: ')[1].split('\r\n')[0]  # headers['Sec-WebSocket-Key']
+        # key = key
         digest = hashlib.sha1((key.encode("utf-8")+self.magic))
         digest = digest.digest()
         digest = b64encode(digest)
@@ -231,7 +232,7 @@ class WebSocketsHandler(socketserver.StreamRequestHandler):
             try:
                 # saving the websocket in order to update the client
                 k = get_instance_key(self)
-                if not self in clients[k].websockets:
+                if self not in clients[k].websockets:
                     clients[k].websockets.append(self)
                 log.debug('on_message')
 
@@ -247,7 +248,7 @@ class WebSocketsHandler(socketserver.StreamRequestHandler):
                             len(msgType) + len(widgetID) + len(functionName) + 3:]
 
                         paramDict = parse_parametrs(params)
-                        #print('msgType: ' + msgType + ' widgetId: ' + widgetID +
+                        # print('msgType: ' + msgType + ' widgetId: ' + widgetID +
                         #      ' function: ' + functionName + ' params: ' + str(params))
 
                         for w in runtimeInstances:
@@ -277,7 +278,7 @@ def parse_parametrs(p):
             fieldValue = p[len(fieldName) + 1:l]
             p = p[l + 1:]
             if fieldValue.count("'") == 0 and fieldValue.count('"') == 0:
-                if fieldValue.count('.') == 1 and fieldValue.replace('.','').isdigit():
+                if fieldValue.count('.') == 1 and fieldValue.replace('.', '').isdigit():
                     fieldValue = float(fieldValue)
                 elif fieldValue.isdigit():
                     fieldValue = int(fieldValue)
@@ -297,7 +298,7 @@ def gui_updater(client, leaf, no_update_because_new_subchild=False):
     __id = str(id(leaf))
     # if the widget is not contained in the copy
     if not (__id in client.old_runtime_widgets.keys()):
-        client.old_runtime_widgets[__id] = leaf.repr(client,False)
+        client.old_runtime_widgets[__id] = leaf.repr(client, False)
         if not no_update_because_new_subchild:
             no_update_because_new_subchild = True
             # we ensure that the clients have an updated version
@@ -306,12 +307,12 @@ def gui_updater(client, leaf, no_update_because_new_subchild=False):
                     # here a new widget is found, but it must be added updating the parent widget
                     if 'parent_widget' in leaf.attributes.keys():
                         parentWidgetId = leaf.attributes['parent_widget']
-                        html = get_method_by_id(client.root,parentWidgetId).repr(client)
+                        html = get_method_by_id(client.root, parentWidgetId).repr(client)
                         ws.send_message('update_widget,' + parentWidgetId + ',' + toWebsocket(html))
                     else:
                         log.error('the new widget seems to have no parent...')
                     # adding new widget with insert_widget causes glitches, so is preferred to update the parent widget
-                    #ws.send_message('insert_widget,' + __id + ',' + parentWidgetId + ',' + repr(leaf))
+                    # ws.send_message('insert_widget,' + __id + ',' + parentWidgetId + ',' + repr(leaf))
                 except:
                     client.websockets.remove(ws)
 
@@ -319,10 +320,10 @@ def gui_updater(client, leaf, no_update_because_new_subchild=False):
     for subleaf in leaf.children.values():
         gui_updater(client, subleaf, no_update_because_new_subchild)
 
-    newhtml = leaf.repr(client,False)
+    newhtml = leaf.repr(client, False)
     if newhtml != client.old_runtime_widgets[__id]:
         for ws in client.websockets:
-            log.debug('update_widget: %s type: %s' %(__id, type(leaf)))
+            log.debug('update_widget: %s type: %s' % (__id, type(leaf)))
             try:
                 html = leaf.repr(client)
                 ws.send_message('update_widget,' + __id + ',' + toWebsocket(html))
@@ -359,7 +360,7 @@ class _UpdateThread(threading.Thread):
                         if not hasattr(client, 'root'):
                             continue
                         # here we check if the root window has changed
-                        if not hasattr(client,'old_root_window') or client.old_root_window != client.root:
+                        if not hasattr(client, 'old_root_window') or client.old_root_window != client.root:
                             # a new window is shown, clean the old_runtime_widgets
                             client.old_runtime_widgets = dict()
                             for ws in client.websockets:
@@ -586,9 +587,8 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
             form = cgi.FieldStorage(
                 fp=self.rfile,
                 headers=self.headers,
-                environ={'REQUEST_METHOD':'POST',
-                        'CONTENT_TYPE':self.headers['Content-Type'],
-                        })
+                environ={'REQUEST_METHOD': 'POST', 'CONTENT_TYPE': self.headers['Content-Type'], }
+                )
             # Echo back information about what was posted in the form
             for field in form.keys():
                 field_item = form[field]
@@ -603,7 +603,7 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
 
             if file_data is not None:
                 log.debug('GUI - server.py do_POST: fileupload path= %s name= %s' % (savepath, filename))
-                with open(savepath+filename,'wb') as f:
+                with open(savepath+filename, 'wb') as f:
                     f.write(file_data)
                     self.send_response(200)
         except Exception as e:
@@ -621,7 +621,7 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
 
     def process_all(self, function):
         static_file = re.match(r"^/*res\/(.*)$", function)
-        attr_call = re.match(r"^\/*(\w+)\/(\w+)\?{0,1}(\w*\={1}\w+\${0,1})*$", function)#re.match(r"^\/*(\w+)\/(\w+)\?*(\w*)$", function)
+        attr_call = re.match(r"^\/*(\w+)\/(\w+)\?{0,1}(\w*\={1}\w+\${0,1})*$", function)  # re.match(r"^\/*(\w+)\/(\w+)\?*(\w*)$", function)
         if (function == '/') or (not function):
             # build the root page once if necessary
             should_call_main = not hasattr(self.client, 'root')
@@ -659,7 +659,7 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
                 self.send_response(404)
                 return
 
-            mimetype,encoding = mimetypes.guess_type(filename)
+            mimetype, encoding = mimetypes.guess_type(filename)
             self.send_response(200)
             self.send_header('Content-type', mimetype if mimetype else 'application/octet-stream')
             if self.server.enable_file_cache:
@@ -674,9 +674,9 @@ function uploadFile(widgetID, eventSuccess, eventFail, savePath,file){
             for k in param_dict:
                 params.append(param_dict[k])
 
-            widget,function = attr_call.group(1,2)
+            widget, function = attr_call.group(1, 2)
             try:
-                content,headers = get_method_by(get_method_by(self.client.root, widget), function)(*params)
+                content, headers = get_method_by(get_method_by(self.client.root, widget), function)(*params)
                 if content is None:
                     self.send_response(503)
                     return
@@ -742,7 +742,7 @@ class Server(object):
         # when listening on multiple net interfaces the browsers connects to localhost
         if shost == '0.0.0.0':
             shost = '127.0.0.1'
-        base_address = 'http://%s:%s/' % (shost,sport)
+        base_address = 'http://%s:%s/' % (shost, sport)
         log.info('Started httpserver %s' % base_address)
         if self._start_browser:
             try:

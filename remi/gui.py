@@ -53,7 +53,7 @@ class EventManager(object):
 
     def register_listener(self, eventname, instance, funcname):
         """register a listener for a specific event"""
-        self.listeners[eventname] = {'instance':instance, 'funcname':funcname}
+        self.listeners[eventname] = {'instance': instance, 'funcname': funcname}
 
 
 class Tag(object):
@@ -77,7 +77,7 @@ class Tag(object):
         packs all the attributes, children and so on."""
 
         self.attributes['children_list'] = ','.join(map(lambda k, v: str(
-            id(v)), self.children.keys(), self.children.values())) 
+            id(v)), self.children.keys(), self.children.values()))
 
         # concatenating innerHTML. in case of html object we use repr, in case
         # of string we use directly the content
@@ -118,13 +118,13 @@ class Tag(object):
 
     def remove(self, child):
         if child in self.children.values():
-            #runtimeInstances.pop( runtimeInstances.index( self.children[key] ) )
+            # runtimeInstances.pop( runtimeInstances.index( self.children[key] ) )
             self._render_children_list.remove(child)
             for k in self.children.keys():
                 if str(id(self.children[k])) == str(id(child)):
                     self.children.pop(k)
-                    #when the child is removed we stop the iteration
-                    #this implies that a child replication should not be allowed
+                    # when the child is removed we stop the iteration
+                    # this implies that a child replication should not be allowed
                     break
 
 
@@ -132,14 +132,14 @@ class Widget(Tag):
 
     """base class for gui widgets.
 
-    In html, it is a DIV tag    
-    the "self.type" attribute specifies the HTML tag representation    
-    the "self.attributes[]" attribute specifies the HTML attributes like "style" "class" "id" 
-    the "self.style[]" attribute specifies the CSS style content like "font" "color". 
+    In html, it is a DIV tag
+    the "self.type" attribute specifies the HTML tag representation
+    the "self.attributes[]" attribute specifies the HTML attributes like "style" "class" "id"
+    the "self.style[]" attribute specifies the CSS style content like "font" "color".
     It will be packet togheter with "self.attributes"
 
     """
-    #constants
+    # constants
     LAYOUT_HORIZONTAL = True
     LAYOUT_VERTICAL = False
 
@@ -148,7 +148,7 @@ class Widget(Tag):
         h = numeric height
         layout_orientation = specifies the "float" css attribute
         widget_spacing = specifies the "margin" css attribute for the children"""
-        super(Widget,self).__init__()
+        super(Widget, self).__init__()
 
         self.style = {}
 
@@ -187,11 +187,11 @@ class Widget(Tag):
     def redraw(self):
         update_event.set()
 
-    def repr(self, client, include_children = True):
+    def repr(self, client, include_children=True):
         """it is used to automatically represent the widget to HTML format
         packs all the attributes, children and so on."""
         self.attributes['style'] = jsonize(self.style)
-        return super(Widget,self).repr(client, include_children)
+        return super(Widget, self).repr(client, include_children)
 
     def append(self, key, value):
         """it allows to add child widgets to this.
@@ -200,7 +200,7 @@ class Widget(Tag):
         specific child in this way 'widget.children[key]'.
 
         """
-        super(Widget,self).append(key, value)
+        super(Widget, self).append(key, value)
 
         if hasattr(self.children[key], 'style'):
             spacing = to_pix(self.widget_spacing)
@@ -211,7 +211,7 @@ class Widget(Tag):
             if 'width' in self.style.keys() and 'width' in self.children[key].style.keys():
                 selfWidth = from_pix(self.style['width']) - from_pix(self.children[key].style['width'])
             self.children[key].style['margin'] = spacing + " " + to_pix(selfWidth/2)
-            
+
             if self.layout_orientation:
                 self.children[key].style['margin'] = to_pix(selfHeight/2) + " " + spacing
                 if 'float' in self.children[key].style.keys():
@@ -244,7 +244,7 @@ class Widget(Tag):
 
     def hide(self):
         """The root window is restored after a show"""
-        if hasattr(self,'baseAppInstance'):
+        if hasattr(self, 'baseAppInstance'):
             self.baseAppInstance.client.root = self.oldRootWidget
 
     def onclick(self):
@@ -286,7 +286,7 @@ class TextInput(Widget):
         self.attributes[self.EVENT_ONCLICK] = ''
         self.attributes[self.EVENT_ONCHANGE] = \
             "var params={};params['newValue']=document.getElementById('%(id)s').value;"\
-            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id':id(self), 'evt':self.EVENT_ONCHANGE}
+            "sendCallbackParam('%(id)s', '%(evt)s',params);" % {'id': id(self), 'evt': self.EVENT_ONCHANGE}
         self.set_text('')
 
         if single_line:
@@ -304,7 +304,7 @@ class TextInput(Widget):
         self.set_text(t)
 
     def get_value(self):
-        #facility, same as get_text
+        # facility, same as get_text
         return self.get_text()
 
     def onchange(self, newValue):
@@ -316,30 +316,30 @@ class TextInput(Widget):
         """register the listener for the onchange event."""
         self.eventManager.register_listener(self.EVENT_ONCHANGE, listener, funcname)
 
-    def onkeydown(self,newValue):
+    def onkeydown(self, newValue):
         """returns the new text value."""
         self.set_text(newValue)
         return self.eventManager.propagate(self.EVENT_ONKEYDOWN, [newValue])
-        
-    def set_on_key_down_listener(self,listener,funcname):
+
+    def set_on_key_down_listener(self, listener, funcname):
         self.attributes[self.EVENT_ONKEYDOWN] = \
             "var params={};params['newValue']=document.getElementById('%(id)s').value;"\
-            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id':id(self), 'evt':self.EVENT_ONKEYDOWN}
+            "sendCallbackParam('%(id)s', '%(evt)s', params);" % {'id': id(self), 'evt': self.EVENT_ONKEYDOWN}
         self.eventManager.register_listener(self.EVENT_ONKEYDOWN, listener, funcname)
 
-    def onenter(self,newValue):
+    def onenter(self, newValue):
         """returns the new text value."""
         self.set_text(newValue)
         return self.eventManager.propagate(self.EVENT_ONENTER, [newValue])
 
-    def set_on_enter_listener(self,listener,funcname):
+    def set_on_enter_listener(self, listener, funcname):
         self.attributes[self.EVENT_ONKEYDOWN] = """
             if (event.keyCode == 13) {
                 var params={};
                 params['newValue']=document.getElementById('%(id)s').value;
                 sendCallbackParam('%(id)s','%(evt)s',params);
                 return false;
-            }""" % {'id':id(self), 'evt':self.EVENT_ONENTER}
+            }""" % {'id': id(self), 'evt': self.EVENT_ONENTER}
         self.eventManager.register_listener(self.EVENT_ONENTER, listener, funcname)
 
 
@@ -377,14 +377,14 @@ class GenericDialog(Widget):
             self.append('1', t)
             self.height = self.height + 50
             self.style['height'] = to_pix(from_pix(self.style['height']) + 50)
-            
+
         if len(message) > 0:
             m = Label(self.width - 20, 30, message)
             self.append('2', m)
             self.height = self.height + 30
             self.style['height'] = to_pix(from_pix(self.style['height']) + 30)
-        
-        self.container = Widget(self.width - 20,0, Widget.LAYOUT_VERTICAL, 0)
+
+        self.container = Widget(self.width - 20, 0, Widget.LAYOUT_VERTICAL, 0)
         self.conf = Button(50, 30, 'Ok')
         self.cancel = Button(50, 30, 'Cancel')
 
@@ -404,20 +404,20 @@ class GenericDialog(Widget):
 
         self.baseAppInstance = None
 
-    def add_field_with_label(self,key,labelDescription,field):
+    def add_field_with_label(self, key, labelDescription, field):
         fields_spacing = 5
         field_height = from_pix(field.style['height']) + fields_spacing*2
         field_width = from_pix(field.style['width']) + fields_spacing*4
         self.style['height'] = to_pix(from_pix(self.style['height']) + field_height)
         self.container.style['height'] = to_pix(from_pix(self.container.style['height']) + field_height)
         self.inputs[key] = field
-        label = Label(self.width-20-field_width-1, 30, labelDescription )
+        label = Label(self.width-20-field_width-1, 30, labelDescription)
         container = Widget(self.width-20, field_height, Widget.LAYOUT_HORIZONTAL, fields_spacing)
-        container.append('lbl' + key,label)
+        container.append('lbl' + key, label)
         container.append(key, self.inputs[key])
         self.container.append(key, container)
-        
-    def add_field(self,key,field):
+
+    def add_field(self, key, field):
         fields_spacing = 5
         field_height = from_pix(field.style['height']) + fields_spacing*2
         field_width = from_pix(field.style['width']) + fields_spacing*2
@@ -453,19 +453,18 @@ class InputDialog(GenericDialog):
     """input dialog, it opens a new webpage allows the OK/CANCEL functionality
     implementing the "confirm_value" and "cancel_dialog" events."""
 
-    def __init__(self, width=500, height=160, title='Title', message='Message',
-                    initial_value=''):
+    def __init__(self, width=500, height=160, title='Title', message='Message', initial_value=''):
         super(InputDialog, self).__init__(width, height, title, message)
 
         self.inputText = TextInput(width - 20, 30)
-        self.inputText.set_on_enter_listener(self,'on_text_enter_listener')
-        self.add_field('textinput',self.inputText)
+        self.inputText.set_on_enter_listener(self, 'on_text_enter_listener')
+        self.add_field('textinput', self.inputText)
         self.inputText.set_text(initial_value)
 
         self.EVENT_ONCONFIRMVALUE = 'confirm_value'
         self.set_on_confirm_dialog_listener(self, 'confirm_value')
 
-    def on_text_enter_listener(self,value):
+    def on_text_enter_listener(self, value):
         """event called pressing on ENTER key.
         propagates the string content of the input field
         """
@@ -500,11 +499,11 @@ class ListView(Widget):
             item.set_on_click_listener(self, self.EVENT_ONSELECTION)
         item.attributes['selected'] = False
         super(ListView, self).append(key, item)
-    
+
     def empty(self):
         self.selected_item = None
         self.selected_key = None
-        super(ListView,self).empty()
+        super(ListView, self).empty()
 
     def onselection(self, clicked_item):
         self.selected_key = None
@@ -600,8 +599,8 @@ class DropDown(Widget):
         self.type = 'select'
         self.attributes[self.EVENT_ONCHANGE] = \
             "var params={};params['newValue']=document.getElementById('%(id)s').value;"\
-            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id':id(self),
-                                                               'evt':self.EVENT_ONCHANGE}
+            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id': id(self),
+                                                               'evt': self.EVENT_ONCHANGE}
         self.selected_item = None
         self.selected_key = None
 
@@ -698,7 +697,7 @@ class Table(Widget):
         super(Table, self).__init__(w, h)
         self.type = 'table'
         self.style['float'] = 'none'
-        
+
     def from_2d_matrix(self, _matrix, fill_title=True):
         """
         Fills the table with the data contained in the provided 2d _matrix
@@ -714,8 +713,8 @@ class Table(Widget):
                     ti = TableTitle(item)
                 else:
                     ti = TableItem(item)
-                tr.append( str(id(ti)), ti )
-            self.append( str(id(tr)), tr )
+                tr.append(str(id(ti)), ti)
+            self.append(str(id(tr)), tr)
             first_row = False
 
 
@@ -763,12 +762,12 @@ class Input(Widget):
         self.attributes[self.EVENT_ONCLICK] = ''
         self.attributes[self.EVENT_ONCHANGE] = \
             "var params={};params['newValue']=document.getElementById('%(id)s').value;"\
-            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id':id(self),
-                                                               'evt':self.EVENT_ONCHANGE}
+            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id': id(self),
+                                                               'evt': self.EVENT_ONCHANGE}
         self.attributes['value'] = str(defaultValue)
         self.attributes['type'] = _type
 
-    def set_value(self,value):
+    def set_value(self, value):
         self.attributes['value'] = str(value)
 
     def get_value(self):
@@ -811,17 +810,17 @@ class CheckBox(Input):
         super(CheckBox, self).__init__(w, h, 'checkbox', user_data)
         self.attributes[self.EVENT_ONCHANGE] = \
             "var params={};params['newValue']=document.getElementById('%(id)s').checked;"\
-            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id':id(self),
-                                                               'evt':self.EVENT_ONCHANGE}
+            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id': id(self),
+                                                               'evt': self.EVENT_ONCHANGE}
         self.set_value(checked)
 
     def onchange(self, newValue):
-        self.set_value( newValue in ('True', 'true') )
+        self.set_value(newValue in ('True', 'true'))
         return self.eventManager.propagate(self.EVENT_ONCHANGE, [newValue])
 
     def set_value(self, checked):
         if checked:
-            self.attributes['checked']='checked'
+            self.attributes['checked'] = 'checked'
         else:
             if 'checked' in self.attributes:
                 del self.attributes['checked']
@@ -860,7 +859,7 @@ class Slider(Input):
     def set_oninput_listener(self, listener, funcname):
         self.attributes[self.EVENT_ONINPUT] = \
             "var params={};params['newValue']=document.getElementById('%(id)s').value;"\
-            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id':id(self), 'evt':self.EVENT_ONINPUT}
+            "sendCallbackParam('%(id)s','%(evt)s',params);" % {'id': id(self), 'evt': self.EVENT_ONINPUT}
         self.eventManager.register_listener(self.EVENT_ONINPUT, listener, funcname)
 
 
@@ -874,8 +873,8 @@ class Date(Input):
 
     def __init__(self, w, h, defaultValue='2015-04-13'):
         super(Date, self).__init__(w, h, 'date', defaultValue)
-        
-        
+
+
 class GenericObject(Widget):
 
     """
@@ -893,7 +892,7 @@ class FileFolderNavigator(Widget):
 
     """FileFolderNavigator widget."""
 
-    def __init__(self, w, h, multiple_selection,selection_folder):
+    def __init__(self, w, h, multiple_selection, selection_folder):
         super(FileFolderNavigator, self).__init__(w, h, Widget.LAYOUT_VERTICAL)
         self.w = w
         self.h = h
@@ -927,16 +926,18 @@ class FileFolderNavigator(Widget):
     def get_selection_list(self):
         return self.selectionlist
 
-    def populate_folder_items(self,directory):
-        def _sort_files(a,b):
+    def populate_folder_items(self, directory):
+        def _sort_files(a, b):
             if os.path.isfile(a) and os.path.isdir(b):
                 return 1
             elif os.path.isfile(b) and os.path.isdir(a):
                 return -1
             else:
                 try:
-                    if a[0] == '.': a = a[1:]
-                    if b[0] == '.': b = b[1:]
+                    if a[0] == '.':
+                        a = a[1:]
+                    if b[0] == '.':
+                        b = b[1:]
                     return (a.lower() > b.lower())
                 except (IndexError, ValueError):
                     return (a > b)
@@ -947,12 +948,12 @@ class FileFolderNavigator(Widget):
         l.sort(key=cmp_to_key(_sort_files))
 
         # used to restore a valid path after a wrong edit in the path editor
-        self.lastValidPath = directory 
+        self.lastValidPath = directory
         # we remove the container avoiding graphic update adding items
         # this speeds up the navigation
         self.remove(self.itemContainer)
         # creation of a new instance of a itemContainer
-        self.itemContainer = Widget(self.w,self.h-25,Widget.LAYOUT_VERTICAL)
+        self.itemContainer = Widget(self.w, self.h-25, Widget.LAYOUT_VERTICAL)
         self.itemContainer.style['overflow-y'] = 'scroll'
         self.itemContainer.style['overflow-x'] = 'hidden'
 
@@ -969,7 +970,7 @@ class FileFolderNavigator(Widget):
     def dir_go_back(self):
         curpath = os.getcwd()  # backup the path
         try:
-            os.chdir( self.pathEditor.get_text() )
+            os.chdir(self.pathEditor.get_text())
             os.chdir('..')
             self.chdir(os.getcwd())
         except Exception as e:
@@ -1001,7 +1002,7 @@ class FileFolderNavigator(Widget):
         self.pathEditor.set_text(directory)
         os.chdir(curpath)  # restore the path
 
-    def on_folder_item_selected(self,folderitem):
+    def on_folder_item_selected(self, folderitem):
         if not self.multiple_selection:
             self.selectionlist = []
             for c in self.folderItems:
@@ -1015,7 +1016,7 @@ class FileFolderNavigator(Widget):
         else:
             self.selectionlist.append(f)
 
-    def on_folder_item_click(self,folderitem):
+    def on_folder_item_click(self, folderitem):
         log.debug("FileFolderNavigator - on_folder_item_dblclick")
         # when an item is clicked two time
         f = os.path.join(self.pathEditor.get_text(), folderitem.get_text())
@@ -1077,12 +1078,12 @@ class FileSelectionDialog(GenericDialog):
     """file selection dialog, it opens a new webpage allows the OK/CANCEL functionality
     implementing the "confirm_value" and "cancel_dialog" events."""
 
-    def __init__(self, width = 600, fileFolderNavigatorHeight=210, title='File dialog',
+    def __init__(self, width=600, fileFolderNavigatorHeight=210, title='File dialog',
                  message='Select files and folders', multiple_selection=True, selection_folder='.'):
         super(FileSelectionDialog, self).__init__(width, 80, title, message)
         self.fileFolderNavigator = FileFolderNavigator(width-30, fileFolderNavigatorHeight,
                                                        multiple_selection, selection_folder)
-        self.add_field('fileFolderNavigator',self.fileFolderNavigator)
+        self.add_field('fileFolderNavigator', self.fileFolderNavigator)
         self.EVENT_ONCONFIRMVALUE = 'confirm_value'
         self.set_on_confirm_dialog_listener(self, 'confirm_value')
 
@@ -1165,22 +1166,22 @@ class FileUploader(Widget):
             "var files = this.files;"\
             "for(var i=0; i<files.length; i++){"\
             "uploadFile('%(id)s','%(evt_success)s','%(evt_failed)s','%(savepath)s',files[i]);}" % {
-                'id':id(self), 'evt_success':self.EVENT_ON_SUCCESS, 'evt_failed':self.EVENT_ON_FAILED,
-                'savepath':self._savepath}
+                'id': id(self), 'evt_success': self.EVENT_ON_SUCCESS, 'evt_failed': self.EVENT_ON_FAILED,
+                'savepath': self._savepath}
 
-    def onsuccess(self,filename):
+    def onsuccess(self, filename):
         return self.eventManager.propagate(self.EVENT_ON_SUCCESS, [filename])
 
     def set_on_success_listener(self, listener, funcname):
         self.eventManager.register_listener(
             self.EVENT_ON_SUCCESS, listener, funcname)
 
-    def onfailed(self,filename):
+    def onfailed(self, filename):
         return self.eventManager.propagate(self.EVENT_ON_FAILED, [filename])
 
     def set_on_failed_listener(self, listener, funcname):
         self.eventManager.register_listener(self.EVENT_ON_FAILED, listener, funcname)
-        
+
 
 class FileDownloader(Widget):
 
@@ -1201,9 +1202,9 @@ class FileDownloader(Widget):
     def download(self):
         with open(self._filename, 'r+b') as f:
             content = f.read()
-        headers = {'Content-type':'application/octet-stream',
-                   'Content-Disposition':'attachment; filename=%s' % os.path.basename(self._filename)}
-        return [content,headers]
+        headers = {'Content-type': 'application/octet-stream',
+                   'Content-Disposition': 'attachment; filename=%s' % os.path.basename(self._filename)}
+        return [content, headers]
 
 
 class Link(Widget):
